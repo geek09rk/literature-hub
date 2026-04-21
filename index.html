@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scholar Hub</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23274b6d'/%3E%3Cpath d='M32 20c-5-4-11-5-17-4v26c6-1 12 0 17 4z' fill='%23fff'/%3E%3Cpath d='M32 20c5-4 11-5 17-4v26c-6-1-12 0-17 4z' fill='%23fff'/%3E%3Cpath d='M32 20v30' stroke='%23d7b35c' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-theme="dark">
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <h1><a href="./index.html">Literature Repository</a></h1>
+        <!-- <div class="sub">Compact, local-first, GitHub Pages-ready workspace for high-throughput paper tracking.</div> -->
+      </div>
+
+      <nav class="tabs" aria-label="Portal sections">
+        <button class="tab-btn active" data-view="dashboardView">Papers</button>
+        <button class="tab-btn" data-view="dataView">Data</button>
+        <button class="tab-btn" data-view="guideView">Guide</button>
+      </nav>
+
+      <div class="topbar-controls">
+        <div class="actions-inline">
+          <button class="btn" id="openShortcutsBtn" title="Show shortcuts">⌘ Shortcuts</button>
+        </div>
+
+        <label class="toggle" title="Toggle light/dark mode">
+          <span id="themeLabel">Dark</span>
+          <span class="switch">
+            <input type="checkbox" id="themeToggle" />
+            <span class="slider"></span>
+          </span>
+        </label>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="view active" id="dashboardView">
+        <div class="panel dashboard-panel">
+          <div class="stats-grid">
+            <div class="stats-card">
+              <div class="label">Total Papers</div>
+              <div class="value" id="statTotal">0</div>
+            </div>
+            <div class="stats-card">
+              <div class="label">Starred</div>
+              <div class="value" id="statStarred">0</div>
+            </div>
+            <div class="stats-card">
+              <div class="label">To Read</div>
+              <div class="value" id="statToRead">0</div>
+            </div>
+            <div class="stats-card">
+              <div class="label">High/Critical</div>
+              <div class="value" id="statHigh">0</div>
+            </div>
+            <div class="stats-card">
+              <div class="label">Projects</div>
+              <div class="value" id="statProjects">0</div>
+            </div>
+          </div>
+
+          <div class="subpanel dashboard-papers">
+            <!-- <div class="section-title">
+              <h3>Paper Library</h3>
+            </div> -->
+
+            <div class="filters">
+              <div class="filter-group">
+                <button class="btn primary" id="addPaperBtn2">＋ Add Paper</button>
+              </div>
+              <div class="filter-group filter-group-main">
+                <select id="projectFilter" class="compact-input filter-select">
+                  <option value="">All projects</option>
+                </select>
+                <select id="yearFilter" class="compact-input filter-select">
+                  <option value="">All years</option>
+                </select>
+                <select id="statusFilter" class="compact-input filter-select">
+                  <option value="">All statuses</option>
+                  <option>To Read</option>
+                  <option>Reading</option>
+                  <option>Reviewed</option>
+                  <option>Cited</option>
+                </select>
+                <select id="priorityFilter" class="compact-input filter-select">
+                  <option value="">All priorities</option>
+                  <option>Low</option>
+                  <option>Medium</option>
+                  <option>High</option>
+                  <option>Critical</option>
+                </select>
+                <select id="articleTypeFilter" class="compact-input filter-select">
+                  <option value="">All article types</option>
+                  <option>Research Article</option>
+                  <option>Review Article</option>
+                  <option>Systematic Review</option>
+                  <option>Meta-Analysis</option>
+                  <option>Case Report</option>
+                  <option>Editorial</option>
+                  <option>Letter</option>
+                  <option>Preprint</option>
+                  <option>Book Chapter</option>
+                  <option>Other</option>
+                </select>
+                <label class="chip"><input type="checkbox" id="starredOnlyFilter" /> Starred only</label>
+              </div>
+              <div class="filter-group filter-group-end">
+                <button class="btn" id="clearFiltersBtn">Clear filters</button>
+                <span class="muted" id="resultsCount">0 results</span>
+              </div>
+            </div>
+
+            <div class="bulkbar">
+              <div class="bulkbar-left">
+                <div class="search-wrap">
+                  <span class="search-icon">⌕</span>
+                  <input id="globalSearch" type="text" placeholder="Search title, authors, project, notes…" />
+                </div>
+                <div class="muted" id="selectedCountText">0 selected</div>
+              </div>
+              <div class="toolbar-right">
+                <button class="btn" id="exportSelectedJsonBtn">Export Selected JSON</button>
+                <button class="btn" id="exportSelectedCsvBtn">Export Selected CSV</button>
+                <button class="btn" id="deleteSelectedBtn">Delete Selected</button>
+                <button class="btn" id="clearSelectionBtn">Clear selection</button>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th class="center"><input type="checkbox" id="selectAllVisible" /></th>
+                    <th class="center">
+                      <button class="sort-header center" type="button" data-sort-key="starred">
+                        <span>★</span><span class="sort-indicator" aria-hidden="true">↕</span>
+                      </button>
+                    </th>
+                    <th>
+                      <button class="sort-header" type="button" data-sort-key="title">
+                        <span>Title</span><span class="sort-indicator" aria-hidden="true">↕</span><span class="col-info" data-tooltip="Click a title to view its full details">ℹ</span>
+                      </button>
+                    </th>
+                    <th>
+                      <button class="sort-header" type="button" data-sort-key="authors">
+                        <span>Authors</span><span class="sort-indicator" aria-hidden="true">↕</span>
+                      </button>
+                    </th>
+                    <th>
+                      <button class="sort-header" type="button" data-sort-key="year">
+                        <span>Year</span><span class="sort-indicator" aria-hidden="true">↕</span>
+                      </button>
+                    </th>
+                    <th>
+                      <button class="sort-header" type="button" data-sort-key="project">
+                        <span>Project</span><span class="sort-indicator" aria-hidden="true">↕</span>
+                      </button>
+                    </th>
+                    <th>
+                      <button class="sort-header" type="button" data-sort-key="journal">
+                        <span>Journal</span><span class="sort-indicator" aria-hidden="true">↕</span>
+                      </button>
+                    </th>
+                    <th>
+                      <button class="sort-header" type="button" data-sort-key="status">
+                        <span>Status</span><span class="sort-indicator" aria-hidden="true">↕</span>
+                      </button>
+                    </th>
+                    <th>
+                      <button class="sort-header" type="button" data-sort-key="priority">
+                        <span>Priority</span><span class="sort-indicator" aria-hidden="true">↕</span>
+                      </button>
+                    </th>
+                    <th>
+                      <button class="sort-header" type="button" data-sort-key="articleType">
+                        <span>Article Type</span><span class="sort-indicator" aria-hidden="true">↕</span>
+                      </button>
+                    </th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="papersTableBody"></tbody>
+              </table>
+            </div>
+
+            <div class="table-footer">
+              <div class="pagination-left">
+                <span class="pagination-label">Rows per page</span>
+                <select id="tablePageSize" class="compact-input tiny-input">
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+                <span class="muted" id="pageSummary">Page 1 of 1</span>
+              </div>
+              <div class="pagination-right">
+                <button class="btn" id="prevPageBtn">Prev</button>
+                <button class="btn" id="nextPageBtn">Next</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="dataView">
+        <div class="panel data-panel">
+          <!-- <div class="data-hero">
+            <div>
+              <div class="data-kicker">Workspace Data</div>
+              <h2>Move, back up, and maintain your library</h2>
+              <div class="data-lead">Import existing records, export clean backups, load demo content for testing, and monitor local storage from one compact control surface.</div>
+            </div>
+            <div class="data-pillbar">
+              <span class="chip">Local-first</span>
+              <span class="chip">Backup-ready</span>
+              <span class="chip">Safe reset flow</span>
+            </div>
+          </div> -->
+
+          <div class="data-actions data-layout">
+            <div class="subpanel data-card">
+              <div class="data-card-head">
+                <div class="data-card-copy">
+                  <div class="data-card-kicker">Restore</div>
+                  <h3 class="data-card-title">Import data</h3>
+                  <div class="data-card-desc">Bring in a full backup or a plain paper list without leaving the portal.</div>
+                </div>
+              </div>
+              <div class="data-form-grid">
+                <div>
+                  <div class="field-label"><span>Import file</span></div>
+                  <input id="importFile" class="field file-input" type="file" accept=".json,.csv" />
+                </div>
+                <div>
+                  <div class="field-label"><span>Mode</span></div>
+                  <select id="importMode">
+                    <option value="merge">Merge with current data</option>
+                    <option value="replace">Replace current data</option>
+                  </select>
+                </div>
+                <div class="data-form-action">
+                  <button class="btn primary" id="importBtn">Import Data</button>
+                </div>
+              </div>
+              <!-- <div class="data-note-list">
+                <div class="data-note">
+                  <div class="data-note-label">JSON</div>
+                  <div class="data-note-copy">Best for full portal restore with papers and saved preferences.</div>
+                </div>
+                <div class="data-note">
+                  <div class="data-note-label">CSV</div>
+                  <div class="data-note-copy">Best for plain paper records when the file already uses matching column headers.</div>
+                </div>
+              </div> -->
+            </div>
+
+            <div class="subpanel data-card data-card-safe">
+              <div class="data-card-head">
+                <div class="data-card-copy">
+                  <div class="data-card-kicker">Archive</div>
+                  <h3 class="data-card-title">Export data</h3>
+                  <div class="data-card-desc">Create a restorable backup or a spreadsheet-friendly copy of your library.</div>
+                </div>
+              </div>
+              <div class="data-action-stack">
+                <button class="btn" id="exportAllJsonBtn">Export Full Backup (JSON)</button>
+                <button class="btn" id="exportAllCsvBtn">Export Papers (CSV)</button>
+              </div>
+              <!-- <div class="data-note-list">
+                <div class="data-note">
+                  <div class="data-note-label">Backup</div>
+                  <div class="data-note-copy">JSON preserves the whole workspace so it can be restored later with minimal friction.</div>
+                </div>
+                <div class="data-note">
+                  <div class="data-note-label">Share</div>
+                  <div class="data-note-copy">CSV is better for spreadsheets, filtering outside the portal, or simple handoff workflows.</div>
+                </div>
+              </div> -->
+            </div>
+
+            <div class="subpanel data-card data-card-soft">
+              <div class="data-card-head">
+                <div class="data-card-copy">
+                  <div class="data-card-kicker">Seed</div>
+                  <h3 class="data-card-title">Demo data</h3>
+                  <div class="data-card-desc">Populate the portal with sample papers for walkthroughs, screenshots, or UI checks.</div>
+                </div>
+              </div>
+              <div class="data-inline-actions">
+                <label class="chip"><input type="checkbox" id="replaceWithDemo" /> Replace current data</label>
+                <button class="btn good" id="demoBtn">Load Demo Data</button>
+              </div>
+              <div class="data-note-list">
+                <div class="data-note">
+                  <div class="data-note-label">Tip</div>
+                  <div class="data-note-copy">Use replace only when you want a temporary sample workspace instead of layering demo records into current data.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="subpanel data-card data-card-danger">
+              <div class="data-card-head">
+                <div class="data-card-copy">
+                  <div class="data-card-kicker">Danger Zone</div>
+                  <h3 class="data-card-title">Reset portal</h3>
+                  <div class="data-card-desc">Clear all stored papers and preferences for this browser profile.</div>
+                </div>
+              </div>
+              <!-- <div class="data-callout">A confirmation prompt appears before deletion, but this action is still destructive once confirmed.</div> -->
+              <div class="data-inline-actions">
+                <button class="btn bad" id="resetBtn">Reset All Portal Data</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="subpanel data-storage-panel">
+            <div class="section-title">
+              <div>
+                <h3>Storage usage</h3>
+                <div class="helper">Current browser footprint for this workspace.</div>
+              </div>
+              <span class="chip">localStorage</span>
+            </div>
+            <div class="storage-grid">
+              <div class="storage-row">
+                <div class="label muted">Portal data size</div>
+                <div class="value" id="storagePortal">0 KB</div>
+              </div>
+              <div class="storage-row">
+                <div class="label muted">Papers count</div>
+                <div class="value" id="storagePapers">0</div>
+              </div>
+              <div class="storage-row">
+                <div class="label muted">Selected papers</div>
+                <div class="value" id="storageSelected">0</div>
+              </div>
+              <div class="storage-row">
+                <div class="label muted">Browser-reported estimate</div>
+                <div class="value" id="storageOrigin">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="guideView">
+        <div class="panel guide-panel">
+          <div class="guide-kicker">Research Desk Handbook</div>
+
+          <!-- <div class="guide-hero">
+            <div>
+              <div class="guide-kicker">Research Desk Handbook</div>
+              <h3>Use the portal like a tidy, working reading desk.</h3>
+              <div class="guide-lead">Start in Papers for day-to-day reading and tracking, use Data when you need to import or back up your library, and keep this page nearby as a clear reference while you settle into the workflow.</div>
+            </div>
+            <div class="guide-overview">
+              <div class="guide-overview-item">
+                <span class="guide-overview-label">Start In</span>
+                <strong>Papers</strong>
+              </div>
+              <div class="guide-overview-item">
+                <span class="guide-overview-label">Protect Work</span>
+                <strong>Data</strong>
+              </div>
+              <div class="guide-overview-item">
+                <span class="guide-overview-label">Quick Help</span>
+                <strong>⌘ Shortcuts</strong>
+              </div>
+            </div>
+          </div> -->
+
+          <div class="guide-grid">
+            <div class="guide-card" data-step="01">
+              <h3>Learn the layout</h3>
+              <ul>
+                <li><b>Papers</b> is your main workspace for adding, searching, filtering, and reviewing papers.</li>
+                <li><b>Data</b> is where you import records, export backups, load demo content, and reset the portal.</li>
+                <li><b>Guide</b> is your built-in help page when you need a quick reminder.</li>
+                <li>The summary cards at the top of Papers show totals for your library, starred items, reading queue, and projects.</li>
+              </ul>
+            </div>
+
+            <div class="guide-card" data-step="02">
+              <h3>Add your first paper</h3>
+              <ul>
+                <li>Click <span class="kbd">+ Add Paper</span> in the Papers tab to open the paper form.</li>
+                <li>Paste a DOI or DOI URL and use <b>Fetch from DOI</b> to fill in metadata automatically.</li>
+                <li>If you work from PubMed, enter a PubMed ID and use <b>Fetch from PMID</b>.</li>
+                <li>You can also type everything manually and save the paper even without DOI or PMID data.</li>
+              </ul>
+            </div>
+
+            <div class="guide-card" data-step="03">
+              <h3>Keep papers organized</h3>
+              <ul>
+                <li>Use <b>Project</b> to group papers by topic, experiment, or manuscript.</li>
+                <li>Use <b>Status</b> like <b>To Read</b>, <b>Reading</b>, <b>Reviewed</b>, and <b>Cited</b> to track progress.</li>
+                <li>Use <b>Priority</b> and the star button to keep the most important papers visible.</li>
+                <li>Click a paper title in the table to open its details, notes, tags, and links.</li>
+              </ul>
+            </div>
+
+            <div class="guide-card" data-step="04">
+              <h3>Find what you need fast</h3>
+              <ul>
+                <li>The search box scans title, authors, journal, project, DOI, PMID, notes, abstract, and tags.</li>
+                <li>Use the filters row to narrow the list by project, year, status, priority, or starred papers.</li>
+                <li>Use <b>Clear filters</b> when you want to get back to the full library quickly.</li>
+                <li>Click any table header to sort the list by title, year, project, priority, dates, and more.</li>
+              </ul>
+            </div>
+
+            <div class="guide-card" data-step="05">
+              <h3>Export, import, and protect your data</h3>
+              <ul>
+                <li>Select rows in the Papers tab when you want to export only part of your library.</li>
+                <li>Use the Data tab to export a full JSON backup or a CSV file for spreadsheet use.</li>
+                <li>Import JSON to restore a full workspace, or CSV to bring in paper records.</li>
+                <li>Use demo data if you want to explore the interface before adding real papers.</li>
+              </ul>
+            </div>
+
+            <div class="guide-card" data-step="06">
+              <h3>Shortcuts and safety tips</h3>
+              <ul>
+                <li>Use the <span class="kbd">⌘ Shortcuts</span> button in the header any time you want the full keyboard shortcut list.</li>
+                <li><span class="kbd">/</span> focuses search, <span class="kbd">N</span> opens a new paper, and <span class="kbd">S</span> toggles the starred filter.</li>
+                <li><span class="kbd">P</span> jumps to Papers, <span class="kbd">D</span> jumps to Data, and <span class="kbd">?</span> opens the shortcuts panel.</li>
+                <li><b>Reset All Portal Data</b> clears browser-stored data, so use it only when you really want a clean slate.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <span>&copy; 2026</span>
+      <span class="footer-divider" aria-hidden="true">|</span>
+      <a href="https://github.com/geek09rk" target="_blank" rel="noopener" aria-label="GitHub profile for Raghav Kataria">
+        <svg class="github-mark" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49C4 14.09 3.48 13.22 3.32 12.77c-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.5 7.5 0 0 1 8 4.73c.68 0 1.37.09 2.01.27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
+        </svg>
+      </a>
+      <span>Developed by <a class="footer-author" href="https://github.com/geek09rk" target="_blank" rel="noopener">Raghav Kataria</a></span>
+      <span class="footer-divider" aria-hidden="true">|</span>
+      <a class="footer-link" href="https://forms.gle/sZTjdEgn1vLRK3e37" target="_blank" rel="noopener" aria-label="Open the feedback form">Feedback</a>
+    </footer>
+  </div>
+
+  <div class="modal" id="paperModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <strong id="modalTitle">Add Paper</strong>
+          <div class="muted">Optional: use DOI or PubMed ID to auto-fill details, or leave both blank and enter the paper manually.</div>
+        </div>
+        <button class="btn icon" id="closeModalBtn">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="paperForm">
+          <input type="hidden" id="paperId" />
+          <div class="modal-grid">
+            <div class="col-6 paper-meta-emphasis paper-meta-emphasis--doi">
+              <div class="field-label"><span>DOI or DOI URL</span><span class="muted">Optional</span></div>
+              <div class="inline-fields">
+                <input class="field" id="paperDoi" placeholder="10.1038/... or https://doi.org/..." />
+                <button class="btn" type="button" id="fetchDoiBtn">Fetch from DOI</button>
+              </div>
+            </div>
+
+            <div class="col-6 paper-meta-emphasis paper-meta-emphasis--pmid">
+              <div class="field-label"><span>NCBI PubMed ID</span><span class="muted">Optional</span></div>
+              <div class="inline-fields">
+                <input class="field" id="paperPmid" placeholder="e.g. 38112345" />
+                <button class="btn" type="button" id="fetchPmidBtn">Fetch from PMID</button>
+              </div>
+            </div>
+
+            <div class="col-8">
+              <div class="field-label"><span>Title</span></div>
+              <textarea class="textarea" id="paperTitle" required></textarea>
+            </div>
+
+            <div class="col-4">
+              <div class="field-label"><span>Author(s)</span></div>
+              <textarea class="textarea" id="paperAuthors" placeholder="Author A; Author B; Author C"></textarea>
+            </div>
+
+            <div class="col-4">
+              <div class="field-label"><span>Journal / Source</span></div>
+              <input class="field" id="paperJournal" />
+            </div>
+            <div class="col-2">
+              <div class="field-label"><span>Year</span></div>
+              <input class="field" id="paperYear" type="number" min="1900" max="2100" />
+            </div>
+            <div class="col-3">
+              <div class="field-label"><span>Status</span></div>
+              <select id="paperStatus">
+                <option>To Read</option>
+                <option>Reading</option>
+                <option>Reviewed</option>
+                <option>Cited</option>
+              </select>
+            </div>
+            <div class="col-3">
+              <div class="field-label"><span>Priority</span></div>
+              <select id="paperPriority">
+                <option>Low</option>
+                <option selected>Medium</option>
+                <option>High</option>
+                <option>Critical</option>
+              </select>
+            </div>
+            <div class="col-4">
+              <div class="field-label"><span>Article Type</span></div>
+              <select id="paperArticleType">
+                <option value="">Not specified</option>
+                <option>Research Article</option>
+                <option>Review Article</option>
+                <option>Systematic Review</option>
+                <option>Meta-Analysis</option>
+                <option>Case Report</option>
+                <option>Editorial</option>
+                <option>Letter</option>
+                <option>Preprint</option>
+                <option>Book Chapter</option>
+                <option>Other</option>
+              </select>
+            </div>
+
+            <div class="col-6">
+              <div class="field-label"><span>URL</span></div>
+              <input class="field" id="paperUrl" placeholder="https://..." />
+            </div>
+
+            <div class="col-6 paper-meta-emphasis paper-meta-emphasis--project">
+              <div class="field-label"><span>Project</span></div>
+              <div class="project-combobox" id="projectCombobox">
+                <input class="field" id="paperProject" type="text" autocomplete="off" placeholder="e.g. Single-cell RNA Seq" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="projectMenu" />
+                <div class="project-menu hidden" id="projectMenu" role="listbox" aria-label="Project suggestions"></div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="field-label"><span>Tag(s)</span></div>
+              <input class="field" id="paperTags" placeholder="review, transcriptomics, docking" />
+            </div>
+
+            <div class="col-6">
+              <div class="field-label"><span>Abstract</span></div>
+              <textarea class="textarea" id="paperAbstract"></textarea>
+            </div>
+            <div class="col-6">
+              <div class="field-label"><span>Notes</span></div>
+              <textarea class="textarea" id="paperNotes"></textarea>
+            </div>
+
+            <div class="col-12">
+              <label class="chip"><input type="checkbox" id="paperStarred" /> Star this paper</label>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-foot">
+        <div class="muted">Tip: fetch first, then add your project-specific notes.</div>
+        <div class="toolbar-right">
+          <button class="btn" id="cancelModalBtn">Cancel</button>
+          <button class="btn primary" id="savePaperBtn">Save Paper</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="paperDetailsModal">
+    <div class="modal-card details-card">
+      <div class="modal-head">
+        <div>
+          <strong id="detailsTitle">Paper Details</strong>
+          <div class="muted" id="detailsSubtitle">Full record</div>
+        </div>
+        <button class="btn icon" id="closeDetailsTopBtn">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="details-body" id="paperDetailsContent"></div>
+      </div>
+
+      <div class="modal-foot">
+        <div class="muted" id="detailsMetaText">Full paper details</div>
+        <div class="toolbar-right">
+          <a class="btn hidden" id="detailsOpenLinkBtn" href="#" target="_blank" rel="noopener">Open link ↗</a>
+          <button class="btn" id="detailsEditBtn">Edit</button>
+          <button class="btn" id="detailsCloseBtn">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="shortcuts" id="shortcutsModal">
+    <div class="shortcuts-card shortcuts-panel" style="width:min(760px,100%);">
+      <div class="shortcuts-head">
+        <div>
+          <strong>Keyboard Shortcuts</strong>
+          <div class="muted">Fast navigation that matches the rest of the workspace</div>
+        </div>
+        <button class="btn icon" id="closeShortcutsBtn">✕</button>
+      </div>
+      <div class="shortcuts-body">
+        <!-- <div class="shortcuts-intro">
+          <div class="shortcuts-intro-title">Use shortcuts when you want less clicking.</div>
+          <div class="shortcuts-intro-copy">These commands help you move through the portal quickly while keeping your focus on papers, filters, and data management.</div>
+        </div> -->
+        <div class="shortcut-grid">
+          <div class="shortcut-item">
+            <div class="shortcut-key"><span class="kbd">/</span></div>
+            <div class="shortcut-copy"><strong>Search</strong><div class="muted">Focus the global search field.</div></div>
+          </div>
+          <div class="shortcut-item">
+            <div class="shortcut-key"><span class="kbd">N</span></div>
+            <div class="shortcut-copy"><strong>New Paper</strong><div class="muted">Open a new paper and focus the DOI or URL field.</div></div>
+          </div>
+          <div class="shortcut-item">
+            <div class="shortcut-key"><span class="kbd">S</span></div>
+            <div class="shortcut-copy"><strong>Star Filter</strong><div class="muted">Toggle the starred-only filter in the Papers view.</div></div>
+          </div>
+          <div class="shortcut-item">
+            <div class="shortcut-key"><span class="kbd">P</span></div>
+            <div class="shortcut-copy"><strong>Papers Tab</strong><div class="muted">Jump directly to the Papers workspace.</div></div>
+          </div>
+          <div class="shortcut-item">
+            <div class="shortcut-key"><span class="kbd">D</span></div>
+            <div class="shortcut-copy"><strong>Data Tab</strong><div class="muted">Jump directly to the Data workspace.</div></div>
+          </div>
+          <div class="shortcut-item">
+            <div class="shortcut-key"><span class="kbd">?</span></div>
+            <div class="shortcut-copy"><strong>Shortcut Help</strong><div class="muted">Open this shortcuts panel from anywhere in the portal.</div></div>
+          </div>
+          <div class="shortcut-item">
+            <div class="shortcut-key"><span class="kbd">Esc</span></div>
+            <div class="shortcut-copy"><strong>Exit Or Clear</strong><div class="muted">Close open panels, exit search focus, clear search, or clear selection when relevant.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="confirm" id="confirmModal">
+    <div class="shortcuts-card" style="width:min(520px,100%);">
+      <div class="shortcuts-head">
+        <div>
+          <strong id="confirmTitle">Confirm action</strong>
+          <div class="muted" id="confirmMessage">Are you sure?</div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <div></div>
+        <div class="toolbar-right">
+          <button class="btn" id="confirmCancelBtn">Cancel</button>
+          <button class="btn bad" id="confirmOkBtn">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
